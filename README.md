@@ -1,1 +1,109 @@
-# ppmi
+# biotx.ai PPMI model evaluation
+
+This repository provides a Docker image and supporting scripts for building a model for the prediction of Parkinson's disease status, using as features the genetic variants selected according to the method described in `Cope et al. forthcoming. Interaction-based feature selection algorithm outperforms polygenic risk score in predicting Parkinson's disease status. Front. Genet.`.
+
+Future commits may extend the current release to include, e.g., scripts for replicating other models described in the paper.
+
+
+## Requirements
+
+The documentation below presumes that the following command-line utilities are available to the user.
+
+- `docker`, `docker-compose`
+- `make`
+
+## Directory structure
+
+This repository includes the following files, **with the exception of the three files in `<angle brackets>`**. These files contain raw PPMI data and must be downloaded independently, after completing an application for access directly with PPMI, as described in the following section.
+
+```bash
+.
+├── .gitignore
+├── Makefile
+├── README.md
+├── build
+│   ├── Dockerfile
+│   └── src
+│       ├── assets
+│       │   ├── sample_list.txt
+│       │   ├── snp_list.txt
+│       │   ├── test_ids.csv
+│       │   ├── train_ids.csv
+│       │   └── val_ids.csv
+│       ├── ppmi_data
+│       │   ├── .gitignore
+│       │   ├── <PPMI_IMMUNOCHIP_Nov11th2013.zip>
+│       │   ├── <PPMI_NEUROX_Nov11th2013.zip>
+│       │   └── <Participant_Status.csv>
+│       └── scripts
+│           ├── model.R
+│           ├── preprocess.sh
+│           ├── run_all.sh
+│           └── split.R
+├── docker-compose.yml
+└── results
+    └── .gitignore
+```
+
+## PPMI data
+
+Before proceeding, users must download the required PPMI files and ensure that they are named correctly and located in the `build/src/ppmi_data` directory.
+
+Visit [https://www.ppmi-info.org/access-data-specimens/download-data/](https://www.ppmi-info.org/access-data-specimens/download-data/) and click the link to _APPLY FOR DATA ACCESS_ or _GO TO LOGIN PAGE_ as applicable.
+
+After logging in, the files `PPMI_IMMUNOCHIP_Nov11th2013.zip` and `PPMI_NEUROX_Nov11th2013.zip` can be acquired by loading `Download > Genetic Data` and selecting `Immunochip SNP Data` and `Project 107: NeuroX SNP Data for Original Cohort (PD, Control and SWEDD participants)`, respectively. The phenotype data can be acquired by following `Download > Study Data > Subject Characteristics > Patient Status` and selecting `Participant Status`.
+
+**Note that the user should not unzip the archived/compressed files.** This will be done automatically when they are copied to the Docker image. 
+
+
+## Using `make`
+
+For ease of use, setup is automated with `make`. The recipes for each of the `make` commands below can be examined by viewing the contents of `Makefile`.
+
+### Building the Docker image
+From the present directory (`ppmi`), run the following:
+```bash
+make build
+```
+This command builds a Docker image according to the specifications provided in `docker-compose.yml` and in `build/Dockerfile`. The image is based on `rocker/tidyverse`, but it additionally installs `Plink 1.9` as well as the assets, data, and scripts included in `build/src`.
+
+### Running the Docker container
+After the previous command is successfully executed, the following can be run to spin up the Docker container:
+```bash
+make run
+```
+The user will find themselves in a `bash` shell in the `/root` directory. The `assets`, `ppmi_data`, `scripts`, and `results` subdirectories will be accessible at this time.
+
+Note that only modifications to contents of the `results` directory will persist past the life of the container. 
+
+## Scripts
+
+Scripts are provided in order to replicate the results of _Cope et al._ automatically. To do so with a single command, execute the following from the `/root` directory:
+```bash
+./scripts/run_all.sh
+```
+This script executes `./scripts/preprocess.sh`, `./scripts/split.R`, and `./scripts/model.R` in sequence. These scripts can also be run individually, as described below, but note that each one depends on the output of its predecessor.
+
+### Data preprocessing
+The first script merges the two PPMI data sources and then filters for the 436 samples and 80 variants described in the corresponding article. The phenotype data is also preprocessed at this time for convenience.
+```bash
+./scripts/preprocess.sh
+```
+While this repository does not replicate the harmonization and quality control steps described in the article, the filtering performed here has the effect of ensuring these data quality standards are maintained.
+
+### Data splitting
+The second script converts the merged and filtered data into a form that is more readily readible by the subsequent model building script, and more importantly, it splits the data into training, validation and testing sets, as described in the article.
+```bash
+./scripts/run_all.sh
+```
+
+### Model building
+The final script builds a LASSO model on the basis of the features and groups of features generated by the feature-selection algorithm as described in the article. This model is then applied to the testing data. AUC and other evaluation metrics are 
+```bash
+./scripts/run_all.sh
+```
+
+## Interactive use
+
+Advanced users are invited to implement additional analyses, borrowing code from our scripts _a la carte_. For this purpose, the `results` directory is provided. Any files written here will remain permanently available to the user.
+
