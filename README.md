@@ -49,7 +49,7 @@ This repository includes the following files, **with the exception of the three 
 
 Before proceeding, users must download the required PPMI files and ensure that they are named correctly and located in the `build/src/ppmi_data` directory.
 
-Visit [https://www.ppmi-info.org/access-data-specimens/download-data/](https://www.ppmi-info.org/access-data-specimens/download-data/) and click the link to _APPLY FOR DATA ACCESS_ or _GO TO LOGIN PAGE_ as applicable.
+Visit (https://www.ppmi-info.org/access-data-specimens/download-data/) and click the link to _APPLY FOR DATA ACCESS_ or _GO TO LOGIN PAGE_ as applicable.
 
 After logging in, the files `PPMI_IMMUNOCHIP_Nov11th2013.zip` and `PPMI_NEUROX_Nov11th2013.zip` can be acquired by loading `Download > Genetic Data` and selecting `Immunochip SNP Data` and `Project 107: NeuroX SNP Data for Original Cohort (PD, Control and SWEDD participants)`, respectively. The phenotype data can be acquired by following `Download > Study Data > Subject Characteristics > Patient Status` and selecting `Participant Status`.
 
