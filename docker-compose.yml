@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  ppmi:
+    build:
+      context: ./build
+    volumes:
+      - ./results:/root/results
+    command: ["bash"]
+  
